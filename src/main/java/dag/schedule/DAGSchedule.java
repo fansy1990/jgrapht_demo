@@ -32,9 +32,11 @@ public class DAGSchedule {
             GraphNode currNode = iterator.next();
             // change status
             changeStatus(cloneGrapht, currNode, NodeStatus.RUNNING);
-            System.out.print(uri+" , ");
-            // change node status
-            uri.setStatus(NodeStatus.SUCCESS);
+
+            if(canRun(cloneGrapht, currNode)){
+
+            }
+
         }
         System.out.println();
         Iterator<GraphNode> iterator2  = new BreadthFirstIterator<>(graph,start);
