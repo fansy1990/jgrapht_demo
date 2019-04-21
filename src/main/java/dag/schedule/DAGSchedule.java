@@ -33,9 +33,9 @@ public class DAGSchedule {
             // change status
             changeStatus(cloneGrapht, currNode, NodeStatus.RUNNING);
 
-            if(canRun(cloneGrapht, currNode)){
-
-            }
+//            if(canRun(cloneGrapht, currNode)){
+//
+//            }
 
         }
         System.out.println();
