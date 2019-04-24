@@ -1,20 +1,15 @@
 package mq.client;
 
-import com.github.dexecutor.core.DexecutorConfig;
 import com.github.dexecutor.core.MoreInfoExecutor;
 import com.github.dexecutor.core.graph.LevelOrderTraversar;
 import com.github.dexecutor.core.graph.Node;
 import com.github.dexecutor.core.graph.StringTraversarAction;
 import com.github.dexecutor.core.graph.TraversarAction;
-import com.github.dexecutor.core.support.ThreadPoolUtil;
-import com.github.dexecutor.core.task.Task;
-import com.github.dexecutor.core.task.TaskProvider;
+import dexecutor.taskprovider.SleepyTaskProvider;
 import mq.entity.GraphNode;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import static mq.utils.DexecutorUtils.constructDAG;
+import static mq.utils.DexecutorUtils.newTaskExecutor;
 
 /**
  * 构建图，并对每个节点绑定consumer
@@ -68,7 +63,7 @@ public class ConstructGraphAndConsumer {
     }
     public static void main(String[] args){
 
-        MoreInfoExecutor<GraphNode, String> executor = constructDAG(newTaskExecutor());
+        MoreInfoExecutor<GraphNode, String> executor = constructDAG(newTaskExecutor(new SleepyTaskProvider()));
 
         executor.print(new LevelOrderTraversar<GraphNode, String>(),new ConsumerBindTraversarAction<GraphNode,String>());
 
@@ -86,39 +81,7 @@ public class ConstructGraphAndConsumer {
     }
 
 
-    private static ExecutorService newExecutor() {
-        return Executors.newFixedThreadPool(ThreadPoolUtil.ioIntesivePoolSize());
-    }
 
-    private static MoreInfoExecutor<GraphNode, String> newTaskExecutor() {
-        ExecutorService executorService = newExecutor();
-
-        DexecutorConfig<GraphNode, String> config = new DexecutorConfig<>(executorService, new SleepyTaskProvider());
-        MoreInfoExecutor<GraphNode, String> executor = new MoreInfoExecutor<>(config);
-
-
-        return executor;
-    }
-
-    private static class SleepyTaskProvider implements TaskProvider<GraphNode, String> {
-
-        public Task<GraphNode, String> provideTask(final GraphNode id) {
-
-            return new Task<GraphNode, String>() {
-
-                public String execute() {
-                    try {
-                        long sleepTime = 500 * Math.round(Math.random() * 10);
-                        Thread.sleep(sleepTime);
-//                        log.info("task id :{}, run time :{}", id, sleepTime);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    return id.getId();
-                }
-            };
-        }
-    }
 
 
 }

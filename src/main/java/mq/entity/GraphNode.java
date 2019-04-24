@@ -10,29 +10,53 @@ import java.util.Map;
  */
 public class GraphNode {
 
-    @Override
-    public String toString() {
-        return this.id;
+    private String className;
+    private NodeStatus status = NodeStatus.INIT;// initial  status
+    private Map<String, String> args = new HashMap<>();
+    private String id;
+
+    public GraphNode() {
     }
 
-    public GraphNode(){}
-
+    public GraphNode(NodeStatus status, Map<String, String> args, String id,String clasName) {
+        this.status = status;
+        this.args = args;
+        this.id = id;
+        this.className = clasName;
+    }
     public GraphNode(NodeStatus status, Map<String, String> args, String id) {
         this.status = status;
         this.args = args;
         this.id = id;
     }
-    public GraphNode( Map<String, String> args, String id) {
+
+    public GraphNode(Map<String, String> args, String id) {
         this.args = args;
         this.id = id;
     }
-    public GraphNode(  String id) {
-        this.args.put("id",id);// 默认参数
+
+    public GraphNode(String id) {
+        this.args.put("id", id);// 默认参数
         this.id = id;
     }
+    public GraphNode(String id,String className) {
+        this.args.put("id", id);// 默认参数
+        this.id = id;
+        this.className = className;
+    }
 
+    public String getClassName() {
+        return className;
+    }
 
-    private NodeStatus status = NodeStatus.INIT;// initial  status
+    public void setClassName(String className) {
+        this.className = className;
+    }
+
+    @Override
+    public String toString() {
+        return this.id;
+    }
 
     public NodeStatus getStatus() {
         return status;
@@ -57,7 +81,4 @@ public class GraphNode {
     public void setId(String id) {
         this.id = id;
     }
-
-    private Map<String,String> args = new HashMap<>();
-    private String id;
 }

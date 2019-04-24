@@ -1,11 +1,16 @@
 package mq.utils;
 
+import com.github.dexecutor.core.DexecutorConfig;
 import com.github.dexecutor.core.MoreInfoExecutor;
+import com.github.dexecutor.core.support.ThreadPoolUtil;
+import com.github.dexecutor.core.task.TaskProvider;
 import mq.entity.GraphNode;
 import mq.entity.NodeStatus;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @Author: fansy
@@ -56,8 +61,11 @@ public class DexecutorUtils {
 
     private static GraphNode get(int i){
         Map<String,String> args = new HashMap<>();
-        args.put("classname", "org."+String.valueOf(i));
-
+        if(i == 3) {
+            args.put("CLASSNAME", "dexecutor.jobs.LongTimeJob");
+        }else{
+            args.put("CLASSNAME", "dexecutor.jobs.ShortTimeJob");
+        }
         return new GraphNode(NodeStatus.INIT, args, String.valueOf(i));
     }
 
@@ -66,6 +74,20 @@ public class DexecutorUtils {
             return graphNodes[i-1];
         }
         return null;
+    }
+
+
+    /**
+     * 返回Executor
+     * @param taskProvider
+     * @return
+     */
+    public static MoreInfoExecutor<GraphNode, String> newTaskExecutor(TaskProvider<GraphNode,String> taskProvider) {
+        ExecutorService executorService = Executors.newFixedThreadPool(ThreadPoolUtil.ioIntesivePoolSize());
+        DexecutorConfig<GraphNode, String> config = new DexecutorConfig<>(executorService, taskProvider);
+        MoreInfoExecutor<GraphNode, String> executor = new MoreInfoExecutor<>(config);
+
+        return executor;
     }
 
 }
