@@ -81,7 +81,10 @@ public class MQUtils {
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
             String message = new String(delivery.getBody(), "UTF-8");
             if(JOB_DONE.equals(message)){
+                log.info("Deleteing queue:{}", queueName);
+                // 如果不加下面代码，则queue仍在，会造成资源泄露
                 getRecvChannel().queueDelete(queueName); // 删除 queue
+
             }
             log.info("{}  Received : '{}'" ,queueName, message );
 

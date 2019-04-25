@@ -5,7 +5,7 @@ import com.github.dexecutor.core.graph.LevelOrderTraversar;
 import com.github.dexecutor.core.graph.Node;
 import com.github.dexecutor.core.graph.StringTraversarAction;
 import com.github.dexecutor.core.graph.TraversarAction;
-import dexecutor.taskprovider.SleepyTaskProvider;
+import dexecutor.taskprovider.SimpleTaskProvider;
 import mq.entity.GraphNode;
 import mq.utils.MQUtils;
 
@@ -30,11 +30,6 @@ public class ConstructGraphAndConsumer {
      * @param <R>
      */
     private static class ConsumerBindTraversarAction<T, R> implements TraversarAction<T, R> {
-
-        public ConsumerBindTraversarAction() {
-
-        }
-
         @Override
         public void onNode(final Node<T, R> node) {
             GraphNode t =null;
@@ -51,35 +46,19 @@ public class ConstructGraphAndConsumer {
 
             }
 
-//            if(node.getValue()  instanceof GraphNode ){
-//                t = (GraphNode) node.getValue();
-//                System.out.print(t.getId() + "、");
-//            }
-
-//            for( Node next : node.getInComingNodes()){
-//                if(next.getValue()  instanceof GraphNode ){
-//                    t = (GraphNode) next.getValue();
-//                    System.out.print(t.getId() + "、");
-//                }
-//            }
-
         }
 
         @Override
         public void onNewPath(int pathNumber) {
-
-            System.out.println("\n Path #" + pathNumber);
         }
 
         @Override
         public void onNewLevel(int levelNumber) {
-
-            System.out.println();
         }
     }
     public static void main(String[] args){
 
-        MoreInfoExecutor<GraphNode, String> executor = constructDAG(newTaskExecutor(new SleepyTaskProvider()));
+        MoreInfoExecutor<GraphNode, String> executor = constructDAG(newTaskExecutor(new SimpleTaskProvider()));
 
         executor.print(new LevelOrderTraversar<GraphNode, String>(),new ConsumerBindTraversarAction<GraphNode,String>());
 
