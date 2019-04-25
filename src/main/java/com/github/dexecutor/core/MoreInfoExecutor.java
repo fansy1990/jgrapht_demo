@@ -17,6 +17,18 @@
 
 package com.github.dexecutor.core;
 
+import com.github.dexecutor.core.graph.Node;
+import com.github.dexecutor.core.graph.Traversar;
+import com.github.dexecutor.core.graph.TraversarAction;
+import com.github.dexecutor.core.graph.Validator;
+import com.github.dexecutor.core.task.*;
+import mq.entity.GraphNode;
+import mq.entity.NodeStatus;
+import mq.utils.MQUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -25,20 +37,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.github.dexecutor.core.graph.Node;
-import com.github.dexecutor.core.graph.Traversar;
-import com.github.dexecutor.core.graph.TraversarAction;
-import com.github.dexecutor.core.graph.Validator;
-import com.github.dexecutor.core.task.ExecutionResult;
-import com.github.dexecutor.core.task.ExecutionResults;
-import com.github.dexecutor.core.task.ExecutionStatus;
-import com.github.dexecutor.core.task.Task;
-import com.github.dexecutor.core.task.TaskFactory;
-import com.github.dexecutor.core.task.TaskProvider;
 
 /**
  * Default implementation of @Dexecutor
@@ -189,7 +187,24 @@ public class MoreInfoExecutor <T, R> implements Dexecutor<T, R> {
                 task.setParentResults(parentResults);
                 if (node.isNotProcessed() && task.shouldExecute(parentResults)) {
                     this.state.incrementUnProcessedNodesCount();
-                    logger.info("Submitting {} node for execution", node.getValue());
+//                    logger.info("Submitting {} node for execution", node.getValue());
+                    // 声明queue 并 发送消息
+                    if(task.getId() instanceof GraphNode){
+                        String queueName = null;
+                        try {
+                            queueName = ((GraphNode)task.getId()).getId();
+                            MQUtils.declareQueue(MQUtils.getSendChannel(),queueName);
+                        } catch (IOException e) {
+                            logger.error("Declare queue :{} failed!", task.getId());
+                        }
+
+                        try {// 发送消息
+                            MQUtils.publishMsg(queueName, NodeStatus.SUBMITTED.name());
+                        } catch (IOException e) {
+                            logger.error("Publish queue:{} message failed!", queueName);
+                        }
+                    }
+
                     this.executionEngine.submit(task);
                 } else if (node.isNotProcessed()){
                     node.setSkipped();
@@ -231,7 +246,20 @@ public class MoreInfoExecutor <T, R> implements Dexecutor<T, R> {
 
     //Check if it can run in separate thread
     private void doAfterExecutionDone(final ExecutionConfig config, final ExecutionResult<T, R> executionResult) {
-        logger.info("Processing of node {} done, with status {}", executionResult.getId(), executionResult.getStatus());
+//        logger.info("Processing of node {} done, with status {}", executionResult.getId(), executionResult.getStatus());
+        //  发送节点实际运行状态消息
+        try {
+            MQUtils.publishMsg(executionResult.getResult().toString(),executionResult.getStatus().name());
+        } catch (IOException e) {
+            logger.error("Send queue :{} msg failed!", executionResult.getResult().toString());
+        }
+
+        try {// 发送完成状态消息
+            MQUtils.publishMsg(executionResult.getResult().toString(),MQUtils.JOB_DONE);
+        } catch (IOException e) {
+            logger.error("Send queue :{} msg failed!", executionResult.getResult().toString());
+        }
+
         state.decrementUnProcessedNodesCount();
 
         final Node<T, R> processedNode = state.getGraphNode(executionResult.getId());

@@ -6,5 +6,5 @@ package mq.entity;
  * @Email: fansy1990@foxmail.com
  */
 public enum NodeStatus {
-    INIT,START,RUNNING,ERROR,FAIL,SUCCESS
+    INIT,SUBMITTED,RUNNING,ERROR,FAIL,SUCCESS
 }

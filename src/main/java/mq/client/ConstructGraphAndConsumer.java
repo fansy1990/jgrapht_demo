@@ -7,6 +7,9 @@ import com.github.dexecutor.core.graph.StringTraversarAction;
 import com.github.dexecutor.core.graph.TraversarAction;
 import dexecutor.taskprovider.SleepyTaskProvider;
 import mq.entity.GraphNode;
+import mq.utils.MQUtils;
+
+import java.io.IOException;
 
 import static mq.utils.DexecutorUtils.constructDAG;
 import static mq.utils.DexecutorUtils.newTaskExecutor;
@@ -35,10 +38,23 @@ public class ConstructGraphAndConsumer {
         @Override
         public void onNode(final Node<T, R> node) {
             GraphNode t =null;
+            // declare queue and bind
             if(node.getValue()  instanceof GraphNode ){
                 t = (GraphNode) node.getValue();
-                System.out.print(t.getId() + "、");
+
+                // 声明queue,并绑定consumer
+                try {
+                    MQUtils.bindConsumer(t.getId());
+                } catch (IOException e) {
+
+                }
+
             }
+
+//            if(node.getValue()  instanceof GraphNode ){
+//                t = (GraphNode) node.getValue();
+//                System.out.print(t.getId() + "、");
+//            }
 
 //            for( Node next : node.getInComingNodes()){
 //                if(next.getValue()  instanceof GraphNode ){
@@ -58,7 +74,7 @@ public class ConstructGraphAndConsumer {
         @Override
         public void onNewLevel(int levelNumber) {
 
-            System.out.println();;
+            System.out.println();
         }
     }
     public static void main(String[] args){
