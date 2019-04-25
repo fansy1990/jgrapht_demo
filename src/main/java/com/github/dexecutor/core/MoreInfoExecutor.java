@@ -80,6 +80,15 @@ public class MoreInfoExecutor <T, R> implements Dexecutor<T, R> {
         this.state.print(traversar, action);
     }
 
+    /**
+     * 为每个节点添加监听
+     * @param traversar
+     * @param action
+     */
+    public void bind(final Traversar<T, R> traversar, final TraversarAction<T, R> action) {
+        print(traversar, action);
+    }
+
     public void addIndependent(final T nodeValue) {
         checkValidPhase();
         this.state.addIndependent(nodeValue);
