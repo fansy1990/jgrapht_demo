@@ -11,6 +11,10 @@ client.onConnectionLost = function (responseObject) {
 
 client.onMessageArrived = function (message) {
     console.info("RECEIVE ON " + message.destinationName + " PAYLOAD " + message.payloadString);
+    if(message.payloadString == "DONE"){
+        client.disconnect();
+        console.info("关闭Client："+client.clientId)
+    }
 };
 
 var options = {

@@ -44,6 +44,7 @@ public class Send {
                 channel.basicPublish("", QUEUE_NAME, null, realMessage.getBytes("UTF-8"));
                 System.out.println(" [x] Sent '" + realMessage + "'");
             }
+            channel.basicPublish("", QUEUE_NAME, null, "DONE".getBytes("UTF-8"));
         }
 
 
